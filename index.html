@@ -3,1875 +3,1204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz - Fundamentos de Nuvem Azure</title>
+    <title>Checklist de Compras Mensais</title>
+    <!-- Biblioteca para exportar para Excel -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- Biblioteca para exportar para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background-color: #f5f5f5;
+            background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
             padding: 20px;
-        }
-        
-        .container {
-            max-width: 900px;
+            max-width: 1400px;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
         }
         
         header {
-            background-color: #0078d4;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
             color: white;
             padding: 25px;
-            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
-        header h1 {
-            font-size: 28px;
+        h1 {
+            font-size: 2.2rem;
             margin-bottom: 10px;
         }
         
-        header p {
-            font-size: 16px;
+        .subtitle {
+            font-size: 1.1rem;
             opacity: 0.9;
+            margin-bottom: 20px;
         }
         
-        .progress-container {
-            background-color: #e6e6e6;
-            padding: 15px 25px;
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d68910;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .total-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
-        .progress-bar {
-            height: 10px;
-            background-color: #e6e6e6;
-            border-radius: 5px;
-            flex-grow: 1;
-            margin-right: 20px;
-            overflow: hidden;
+        .total-display {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
         }
         
-        .progress {
-            height: 100%;
-            background-color: #0078d4;
-            width: 2%;
-            transition: width 0.5s ease;
+        .total-value {
+            color: #27ae60;
         }
         
-        .question-counter {
-            font-weight: bold;
-            color: #0078d4;
-            white-space: nowrap;
-        }
-        
-        .question-container {
-            padding: 30px 25px;
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
         }
         
         .category {
-            display: inline-block;
-            background-color: #e6f2ff;
-            color: #0078d4;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
         }
         
-        .question-text {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 25px;
-            line-height: 1.4;
+        .category:hover {
+            transform: translateY(-5px);
         }
         
-        .question-type {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 5px;
-            font-style: italic;
-        }
-        
-        .options-container {
-            margin-bottom: 25px;
-        }
-        
-        .option {
-            background-color: #f9f9f9;
-            border: 2px solid #e6e6e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-        }
-        
-        .option:hover {
-            background-color: #f0f0f0;
-            border-color: #cccccc;
-        }
-        
-        .option.selected {
-            background-color: #e6f2ff;
-            border-color: #0078d4;
-        }
-        
-        .option.correct {
-            background-color: #e7f7e7;
-            border-color: #28a745;
-        }
-        
-        .option.incorrect {
-            background-color: #fde8e8;
-            border-color: #dc3545;
-        }
-        
-        .option input[type="checkbox"], 
-        .option input[type="radio"] {
-            margin-right: 15px;
-            transform: scale(1.2);
-        }
-        
-        .option-label {
-            flex-grow: 1;
-        }
-        
-        .explanation-container {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 25px;
-            display: none;
-        }
-        
-        .explanation-title {
-            font-weight: 600;
-            color: #0078d4;
-            margin-bottom: 10px;
-        }
-        
-        .explanation-text {
-            color: #555;
-        }
-        
-        .buttons-container {
+        .category-header {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
-            padding: 20px 25px;
-            border-top: 1px solid #e6e6e6;
-        }
-        
-        button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            font-weight: 600;
+            align-items: center;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 16px;
+            user-select: none;
         }
         
-        #prev-btn {
-            background-color: #f8f9fa;
-            color: #333;
-            border: 1px solid #ddd;
+        .category-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        #prev-btn:hover:not(:disabled) {
-            background-color: #e9ecef;
+        .category-title .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 0.9rem;
         }
         
-        #next-btn, #submit-btn, #restart-btn, #review-btn, #submit-review-btn, #finish-review-btn {
-            background-color: #0078d4;
-            color: white;
+        .category.collapsed .toggle-icon {
+            transform: rotate(-90deg);
         }
         
-        #next-btn:hover, #submit-btn:hover, #restart-btn:hover, #review-btn:hover, #submit-review-btn:hover, #finish-review-btn:hover {
-            background-color: #005a9e;
+        .category-total {
+            font-weight: 600;
+            font-size: 1.1rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
         }
         
-        #prev-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .category-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
         }
         
-        .results-container {
-            padding: 40px 25px;
-            text-align: center;
-            display: none;
+        .category:not(.collapsed) .category-content {
+            max-height: 400px;
         }
         
-        .results-title {
-            font-size: 28px;
-            color: #0078d4;
-            margin-bottom: 20px;
+        .category.collapsed .category-content {
+            max-height: 0;
         }
         
-        .score {
-            font-size: 72px;
-            font-weight: bold;
-            color: #28a745;
-            margin: 20px 0;
-        }
-        
-        .score-text {
-            font-size: 18px;
-            margin-bottom: 30px;
-            color: #555;
-        }
-        
-        .results-details {
-            text-align: left;
-            margin-top: 30px;
-            background-color: #f8f9fa;
+        .items-list {
             padding: 20px;
-            border-radius: 8px;
+            overflow-y: auto;
         }
         
-        .results-details h3 {
-            color: #0078d4;
-            margin-bottom: 15px;
+        .category:not(.collapsed) .items-list {
+            max-height: 350px;
         }
         
-        .results-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
         }
         
-        .summary-item {
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.05);
+        .item:last-child {
+            border-bottom: none;
         }
         
-        .summary-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #0078d4;
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
         }
         
-        .summary-label {
-            font-size: 14px;
-            color: #666;
+        .item-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .item-name {
+            font-size: 1rem;
+        }
+        
+        .item-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .item-price-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             margin-top: 5px;
         }
         
-        .review-container {
-            padding: 40px 25px;
-            text-align: center;
-            display: none;
+        .quantity-input, .price-input {
+            width: 90px;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-align: right;
         }
         
-        .review-title {
-            font-size: 28px;
-            color: #dc3545;
-            margin-bottom: 20px;
+        .quantity-input:focus, .price-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
         
-        .review-stats {
-            font-size: 18px;
-            margin-bottom: 30px;
-            color: #555;
+        .unit-price-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            min-width: 70px;
         }
         
-        .review-question-counter {
-            font-weight: bold;
-            color: #dc3545;
-            margin-bottom: 20px;
-            font-size: 18px;
+        .item-value {
+            font-weight: 600;
+            min-width: 80px;
+            text-align: right;
+            font-size: 0.95rem;
         }
         
-        .review-note {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
+        .item-subtotal {
+            font-size: 0.85rem;
+            color: #27ae60;
+            margin-top: 2px;
+        }
+        
+        .notes-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .notes-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .notes-textarea {
+            width: 100%;
+            height: 120px;
             padding: 15px;
-            margin-bottom: 25px;
-            text-align: left;
-            color: #856404;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            resize: vertical;
         }
         
-        .review-results-container {
-            padding: 40px 25px;
+        .notes-textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .footer {
             text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
         }
         
-        .review-results-title {
-            font-size: 28px;
-            color: #28a745;
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
             margin-bottom: 20px;
+            color: #2c3e50;
         }
         
-        .review-score {
-            font-size: 72px;
-            font-weight: bold;
-            color: #dc3545;
-            margin: 20px 0;
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
         }
         
-        .improvement {
-            font-size: 18px;
-            margin-bottom: 30px;
-            color: #555;
+        .category-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .category-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-category {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-category:hover {
+            background-color: #2980b9;
         }
         
         @media (max-width: 768px) {
-            .progress-container {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
                 flex-direction: column;
-                align-items: flex-start;
             }
             
-            .progress-bar {
+            .btn {
                 width: 100%;
-                margin-right: 0;
-                margin-bottom: 10px;
+                justify-content: center;
             }
             
-            .buttons-container {
+            .item-price-controls {
+                flex-wrap: wrap;
+            }
+            
+            .quantity-input, .price-input {
+                width: 80px;
+            }
+            
+            .category-controls {
                 flex-direction: column;
                 gap: 10px;
             }
             
-            button {
-                width: 100%;
+            .category-buttons {
+                justify-content: center;
+                flex-wrap: wrap;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Quiz - Fundamentos de Nuvem Azure</h1>
-            <p>Teste seus conhecimentos sobre conceitos de computação em nuvem e Microsoft Azure</p>
-        </header>
-        
-        <!-- Área do Quiz Principal -->
-        <div class="progress-container" id="main-progress-container">
-            <div class="progress-bar">
-                <div class="progress" id="progress"></div>
-            </div>
-            <div class="question-counter" id="question-counter">Pergunta 1 de 50</div>
+    <header>
+        <h1>📋 Checklist de Compras Mensais</h1>
+        <p class="subtitle">Para homem de 32 anos - Organize suas compras de carne, alimentos, higiene e limpeza</p>
+    </header>
+
+    <div class="controls">
+        <button class="btn btn-primary" onclick="calculateTotals()">
+            <span>🔄</span> Calcular Totais
+        </button>
+        <button class="btn btn-success" onclick="exportToExcel()">
+            <span>📊</span> Exportar para Excel
+        </button>
+        <button class="btn btn-warning" onclick="exportToPDF()">
+            <span>📄</span> Exportar para PDF
+        </button>
+        <button class="btn btn-danger" onclick="clearAll()">
+            <span>🗑️</span> Limpar Tudo
+        </button>
+        <button class="btn btn-primary" onclick="saveChecklist()">
+            <span>💾</span> Salvar Checklist
+        </button>
+    </div>
+
+    <div class="total-container">
+        <div>
+            <h2>Total Geral Estimado</h2>
+            <p>Valor total de todas as categorias (inclui apenas itens marcados)</p>
         </div>
-        
-        <div class="question-container" id="question-container">
-            <div class="category" id="category">Fundamentos</div>
-            <div class="question-type" id="question-type">Tipo: Escolha única</div>
-            <div class="question-text" id="question-text">Carregando pergunta...</div>
-            
-            <div class="options-container" id="options-container">
-                <!-- Opções serão inseridas aqui dinamicamente -->
-            </div>
-            
-            <div class="explanation-container" id="explanation-container">
-                <div class="explanation-title">Explicação:</div>
-                <div class="explanation-text" id="explanation-text"></div>
-            </div>
+        <div class="total-display">
+            R$ <span id="totalValue" class="total-value">0,00</span>
         </div>
-        
-        <div class="buttons-container" id="main-buttons-container">
-            <button id="prev-btn" disabled>Anterior</button>
-            <button id="next-btn">Próxima</button>
-            <button id="submit-btn" style="display: none;">Ver Resultado</button>
-            <button id="restart-btn" style="display: none;">Refazer Quiz</button>
-            <button id="review-btn" style="display: none;">Revisar Erradas</button>
+    </div>
+
+    <div class="category-controls">
+        <h3>Controles das Categorias</h3>
+        <div class="category-buttons">
+            <button class="btn-category" onclick="expandAllCategories()">⬇️ Expandir Todas</button>
+            <button class="btn-category" onclick="collapseAllCategories()">⬆️ Minimizar Todas</button>
+            <button class="btn-category" onclick="toggleAllCategories()">🔄 Alternar Todas</button>
         </div>
-        
-        <!-- Resultados do Quiz Principal -->
-        <div class="results-container" id="results-container">
-            <h2 class="results-title">Quiz Concluído!</h2>
-            <div class="score" id="score">0%</div>
-            <p class="score-text" id="score-text">Você acertou <span id="correct-answers">0</span> de <span id="total-questions">50</span> perguntas</p>
-            
-            <div class="results-summary">
-                <div class="summary-item">
-                    <div class="summary-value" id="correct-count">0</div>
-                    <div class="summary-label">Corretas</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="incorrect-count">0</div>
-                    <div class="summary-label">Incorretas</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="percentage">0%</div>
-                    <div class="summary-label">Aproveitamento</div>
-                </div>
-            </div>
-            
-            <div id="review-section" style="margin-top: 30px;">
-                <h3 style="color: #dc3545; margin-bottom: 15px;">Revisão de Perguntas Erradas</h3>
-                <p id="review-message" style="margin-bottom: 20px;">Você errou <span id="wrong-count">0</span> perguntas.</p>
-                <p style="margin-bottom: 20px; color: #555;">Você pode responder novamente às perguntas que errou para testar seu aprendizado.</p>
-                <button id="start-review-btn" style="background-color: #dc3545; color: white; padding: 12px 25px; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; margin-bottom: 15px;">
-                    Responder Perguntas Erradas Novamente
-                </button>
-                <div style="margin-top: 15px;">
-                    <button id="restart-btn-2" class="restart-btn">Refazer Quiz Completo</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Área da Revisão Interativa -->
-        <div class="review-container" id="review-container">
-            <h2 class="review-title">Revisão Interativa</h2>
-            <div class="review-note">
-                <strong>Importante:</strong> Você está respondendo novamente as perguntas que errou no quiz original. 
-                Tente acertar desta vez! Após responder, você verá se acertou ou não.
-            </div>
-            
-            <!-- Progresso da Revisão -->
-            <div class="progress-container" id="review-progress-container" style="margin-bottom: 20px;">
-                <div class="progress-bar">
-                    <div class="progress" id="review-progress"></div>
-                </div>
-                <div class="question-counter" id="review-question-counter">Pergunta 1 de 0</div>
-            </div>
-            
-            <div class="review-stats" id="review-stats">Respondendo 0 perguntas</div>
-            
-            <!-- Pergunta da Revisão -->
-            <div class="question-container">
-                <div class="category" id="review-category">Fundamentos</div>
-                <div class="question-type" id="review-question-type">Tipo: Escolha única</div>
-                <div class="question-text" id="review-question-text">Carregando pergunta...</div>
-                
-                <div class="options-container" id="review-options-container">
-                    <!-- Opções serão inseridas aqui dinamicamente -->
-                </div>
-                
-                <div class="explanation-container" id="review-explanation-container" style="display: none;">
-                    <div class="explanation-title">Explicação:</div>
-                    <div class="explanation-text" id="review-explanation-text"></div>
-                </div>
-            </div>
-            
-            <!-- Botões da Revisão -->
-            <div class="buttons-container">
-                <button id="review-prev-btn" disabled>Anterior</button>
-                <button id="review-next-btn">Próxima</button>
-                <button id="submit-review-btn" style="display: none;">Ver Resultado da Revisão</button>
-            </div>
-        </div>
-        
-        <!-- Resultados da Revisão -->
-        <div class="review-results-container" id="review-results-container">
-            <h2 class="review-results-title">Revisão Concluída!</h2>
-            <div class="review-score" id="review-score">0%</div>
-            <p class="score-text" id="review-score-text">Na revisão, você acertou <span id="review-correct-answers">0</span> de <span id="review-total-questions">0</span> perguntas</p>
-            
-            <div class="improvement" id="improvement-text">
-                <!-- Texto sobre melhoria será inserido aqui -->
-            </div>
-            
-            <div class="results-summary">
-                <div class="summary-item">
-                    <div class="summary-value" id="review-correct-count">0</div>
-                    <div class="summary-label">Acertos na Revisão</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="review-incorrect-count">0</div>
-                    <div class="summary-label">Erros na Revisão</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="review-improvement">0%</div>
-                    <div class="summary-label">Melhoria</div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 30px;">
-                <button id="back-to-main-results-btn" style="background-color: #0078d4; color: white; padding: 12px 25px; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; margin-right: 10px;">
-                    Voltar aos Resultados
-                </button>
-                <button id="restart-review-btn" style="background-color: #dc3545; color: white; padding: 12px 25px; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; margin-right: 10px;">
-                    Refazer Revisão
-                </button>
-                <button id="restart-full-quiz-btn" style="background-color: #28a745; color: white; padding: 12px 25px; border: none; border-radius: 5px; font-weight: 600; cursor: pointer;">
-                    Refazer Quiz Completo
-                </button>
+    </div>
+
+    <div class="container" id="checklistContainer">
+        <!-- Categorias serão inseridas aqui via JavaScript -->
+    </div>
+
+    <div class="notes-section">
+        <h3 class="notes-title">📝 Observações e Notas</h3>
+        <textarea class="notes-textarea" id="notes" placeholder="Adicione observações sobre suas compras, promoções encontradas, lembretes importantes..."></textarea>
+    </div>
+
+    <div class="footer">
+        <p>Checklist desenvolvido para planejamento mensal de compras | Atualize os valores conforme necessário</p>
+    </div>
+
+    <!-- Modal para limpar tudo -->
+    <div id="clearModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">⚠️ Limpar Checklist</h3>
+            <p>Tem certeza que deseja limpar todos os dados do checklist? Esta ação não pode ser desfeita.</p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" onclick="confirmClear()">Sim, Limpar Tudo</button>
+                <button class="btn btn-primary" onclick="closeModal()">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Dados do quiz - TODAS as 50 perguntas
-        const quizData = [
-            {
-                id: 1,
-                question: "Quais são dois serviços básicos fornecidos por todos os provedores de nuvem? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Fundamentos",
-                options: [
-                    { text: "computação", correct: true },
-                    { text: "armazenamento", correct: true },
-                    { text: "colocação", correct: false },
-                    { text: "desenvolvimento de aplicativos", correct: false }
-                ],
-                explanation: "Todos os provedores de nuvem fornecem serviços de computação e armazenamento. A colocação é quando uma empresa aluga espaço em um datacenter físico compartilhado. O desenvolvimento de aplicativos é responsabilidade do cliente."
-            },
-            {
-                id: 2,
-                question: "Quais são as duas características que são vantagens comuns da computação em nuvem? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Fundamentos",
-                options: [
-                    { text: "distribuição geográfica", correct: true },
-                    { text: "alta disponibilidade", correct: true },
-                    { text: "acesso físico aos servidores", correct: false },
-                    { text: "virtualização", correct: false }
-                ],
-                explanation: "Distribuição geográfica e alta disponibilidade são vantagens da nuvem."
-            },
-            {
-                id: 3,
-                question: "Qual é a vantagem da computação em nuvem em comparação com implantações locais?",
-                type: "single",
-                category: "Fundamentos",
-                options: [
-                    { text: "Você pode dimensionar mais rapidamente.", correct: true },
-                    { text: "Você possui suas próprias CPUs.", correct: false },
-                    { text: "Você tem acesso total no caso de uma interrupção da Internet.", correct: false },
-                    { text: "Você trabalha em várias estações de trabalho.", correct: false }
-                ],
-                explanation: "A computação em nuvem permite dimensionar mais rapidamente."
-            },
-            {
-                id: 4,
-                question: "Aumentar a capacidade de computação de um aplicativo adicionando RAM ou CPUs a uma máquina virtual é chamado:",
-                type: "single",
-                category: "Computação",
-                options: [
-                    { text: "dimensionamento vertical", correct: true },
-                    { text: "dimensionamento horizontal", correct: false },
-                    { text: "recuperação de desastre", correct: false },
-                    { text: "alta disponibilidade", correct: false }
-                ],
-                explanation: "Adicionar RAM ou CPU é dimensionamento vertical."
-            },
-            {
-                id: 5,
-                question: "Implantar e configurar recursos baseados em nuvem rapidamente à medida que os requisitos de negócios mudam é chamado:",
-                type: "single",
-                category: "Fundamentos",
-                options: [
-                    { text: "agilidade", correct: true },
-                    { text: "escalabilidade", correct: false },
-                    { text: "elasticidade", correct: false },
-                    { text: "alta disponibilidade", correct: false }
-                ],
-                explanation: "Isso se chama agilidade."
-            },
-            {
-                id: 6,
-                question: "Aumentar a capacidade de computação de um aplicativo adicionando instâncias de recursos, como máquinas virtuais, é chamado:",
-                type: "single",
-                category: "Computação",
-                options: [
-                    { text: "dimensionamento horizontal", correct: true },
-                    { text: "dimensionamento vertical", correct: false },
-                    { text: "recuperação de desastre", correct: false },
-                    { text: "alta disponibilidade", correct: false }
-                ],
-                explanation: "Adicionar mais instâncias é dimensionamento horizontal."
-            },
-            {
-                id: 7,
-                question: "O que é a alta disponibilidade em um ambiente de nuvem pública dependente?",
-                type: "single",
-                category: "Fundamentos",
-                options: [
-                    { text: "o SLA (contrato de nível de serviço) escolhido", correct: true },
-                    { text: "o número de datacenters", correct: false },
-                    { text: "a velocidade da internet", correct: false },
-                    { text: "o tipo de armazenamento", correct: false }
-                ],
-                explanation: "A alta disponibilidade depende do SLA escolhido."
-            },
-            {
-                id: 8,
-                question: "Na computação em nuvem, _____ permite implantar aplicativos em datacenters regionais em todo o mundo.",
-                type: "single",
-                category: "Fundamentos",
-                options: [
-                    { text: "recuperação de desastre", correct: false },
-                    { text: "localização geográfica", correct: true },
-                    { text: "escalabilidade vertical", correct: false },
-                    { text: "virtualização", correct: false }
-                ],
-                explanation: "Isso se chama localização geográfica."
-            },
-            {
-                id: 9,
-                question: "Em quais dois modelos de implantação os clientes são responsáveis por gerenciar sistemas operacionais que hospedam aplicativos? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Fundamentos",
-                options: [
-                    { text: "infraestrutura como serviço (IaaS)", correct: true },
-                    { text: "local", correct: true },
-                    { text: "plataforma como serviço (PaaS)", correct: false },
-                    { text: "software como serviço (SaaS)", correct: false }
-                ],
-                explanation: "IaaS e implantações locais exigem gerenciamento do SO."
-            },
-            {
-                id: 10,
-                question: "Qual tipo de modelo de serviço de nuvem normalmente é licenciado por meio de uma assinatura mensal ou anual?",
-                type: "single",
-                category: "Fundamentos",
-                options: [
-                    { text: "software como serviço (SaaS)", correct: true },
-                    { text: "plataforma como serviço (PaaS)", correct: false },
-                    { text: "infraestrutura como serviço (IaaS)", correct: false },
-                    { text: "função como serviço (FaaS)", correct: false }
-                ],
-                explanation: "SaaS normalmente usa assinatura mensal/anual."
-            },
-            {
-                id: 11,
-                question: "Sua organização está criando um aplicativo personalizado. Você precisa se concentrar no desenvolvimento de aplicativos em vez de configuração e gerenciamento de servidores. Qual modelo de serviço de nuvem você deve usar?",
-                type: "single",
-                category: "Serviços de Nuvem",
-                options: [
-                    { text: "plataforma como serviço (PaaS)", correct: true },
-                    { text: "software como serviço (SaaS)", correct: false },
-                    { text: "infraestrutura como serviço (IaaS)", correct: false },
-                    { text: "função como serviço (FaaS)", correct: false }
-                ],
-                explanation: "Com o PaaS, você pode se concentrar no desenvolvimento enquanto o provedor gerencia a plataforma."
-            },
-            {
-                id: 12,
-                question: "Qual modelo de serviço de nuvem é usado pelo Microsoft Office 365?",
-                type: "single",
-                category: "Serviços de Nuvem",
-                options: [
-                    { text: "software como serviço (SaaS)", correct: true },
-                    { text: "plataforma como serviço (PaaS)", correct: false },
-                    { text: "infraestrutura como serviço (IaaS)", correct: false },
-                    { text: "desktop como serviço (DaaS)", correct: false }
-                ],
-                explanation: "Office 365 é um exemplo clássico de SaaS."
-            },
-            {
-                id: 13,
-                question: "O que usa o modelo de serviço de nuvem IaaS (infraestrutura como serviço)?",
-                type: "single",
-                category: "Serviços de Nuvem",
-                options: [
-                    { text: "Máquinas virtuais do Azure", correct: true },
-                    { text: "Serviços de Aplicativo do Azure", correct: false },
-                    { text: "Azure Cosmos DB", correct: false },
-                    { text: "Microsoft Office 365", correct: false }
-                ],
-                explanation: "Máquinas Virtuais do Azure são IaaS."
-            },
-            {
-                id: 14,
-                question: "Qual tipo de serviço de nuvem são redes virtuais?",
-                type: "single",
-                category: "Serviços de Nuvem",
-                options: [
-                    { text: "infraestrutura como serviço (IaaS)", correct: true },
-                    { text: "plataforma como serviço (PaaS)", correct: false },
-                    { text: "software como serviço (SaaS)", correct: false },
-                    { text: "função como serviço (FaaS)", correct: false }
-                ],
-                explanation: "Redes virtuais fazem parte da IaaS."
-            },
-            {
-                id: 15,
-                question: "_____ é o contêiner lógico usado para combinar e organizar recursos do Azure.",
-                type: "single",
-                category: "Arquitetura Azure",
-                options: [
-                    { text: "ARM (Azure Resource Manager)", correct: false },
-                    { text: "um grupo de recursos", correct: true },
-                    { text: "uma assinatura do Azure", correct: false },
-                    { text: "uma zona de disponibilidade", correct: false }
-                ],
-                explanation: "Recursos são organizados em grupos de recursos."
-            },
-            {
-                id: 16,
-                question: "Em um par de regiões, uma região é emparelhada com outra região na mesma _____.",
-                type: "single",
-                category: "Arquitetura Azure",
-                options: [
-                    { text: "geografia", correct: true },
-                    { text: "zona de disponibilidade", correct: false },
-                    { text: "datacenter", correct: false },
-                    { text: "assinatura", correct: false }
-                ],
-                explanation: "Pares de regiões estão na mesma geografia."
-            },
-            {
-                id: 17,
-                question: "Quais dois componentes são criados em uma assinatura do Azure? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Arquitetura Azure",
-                options: [
-                    { text: "grupos de recursos", correct: true },
-                    { text: "recursos", correct: true },
-                    { text: "grupos de gerenciamento", correct: false },
-                    { text: "contas", correct: false }
-                ],
-                explanation: "Assinaturas contêm grupos de recursos e recursos."
-            },
-            {
-                id: 18,
-                question: "O que é uma conta de Armazenamento do Azure chamada storage001 como exemplo?",
-                type: "single",
-                category: "Arquitetura Azure",
-                options: [
-                    { text: "um recurso", correct: true },
-                    { text: "um grupo de recursos", correct: false },
-                    { text: "uma assinatura", correct: false },
-                    { text: "um grupo de gerenciamento", correct: false }
-                ],
-                explanation: "É um recurso do Azure."
-            },
-            {
-                id: 19,
-                question: "Qual componente do Azure permite replicar recursos em uma geografia para garantir a continuidade dos negócios durante um desastre natural no site primário?",
-                type: "single",
-                category: "Arquitetura Azure",
-                options: [
-                    { text: "pares de região", correct: true },
-                    { text: "zonas de disponibilidade", correct: false },
-                    { text: "grupos de gerenciamento", correct: false },
-                    { text: "assinaturas", correct: false }
-                ],
-                explanation: "Pares de região permitem replicação para continuidade."
-            },
-            {
-                id: 20,
-                question: "Qual serviço de computação do Azure você pode usar para implantar e gerenciar um conjunto de máquinas virtuais idênticas?",
-                type: "single",
-                category: "Computação",
-                options: [
-                    { text: "Conjuntos de escalas de máquinas virtuais do Azure", correct: true },
-                    { text: "Azure Functions", correct: false },
-                    { text: "Azure App Service", correct: false },
-                    { text: "Azure Container Instances", correct: false }
-                ],
-                explanation: "Conjuntos de Dimensionamento gerenciam VMs idênticas."
-            },
-            {
-                id: 21,
-                question: "O que você pode usar para executar código em um ambiente sem servidor?",
-                type: "single",
-                category: "Computação",
-                options: [
-                    { text: "Azure Functions", correct: true },
-                    { text: "Azure Virtual Machines", correct: false },
-                    { text: "Azure App Service", correct: false },
-                    { text: "Azure Kubernetes Service", correct: false }
-                ],
-                explanation: "Azure Functions é serverless."
-            },
-            {
-                id: 22,
-                question: "Você precisa permitir que recursos em duas redes virtuais diferentes do Azure se comuniquem entre si. O que você deve configurar?",
-                type: "single",
-                category: "Rede",
-                options: [
-                    { text: "emparelhamento", correct: true },
-                    { text: "VPN Gateway", correct: false },
-                    { text: "ExpressRoute", correct: false },
-                    { text: "Firewall do Azure", correct: false }
-                ],
-                explanation: "Emparelhamento conecta redes virtuais."
-            },
-            {
-                id: 23,
-                question: "Quais dois serviços você pode usar para estabelecer conectividade de rede entre uma rede local e recursos do Azure? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Rede",
-                options: [
-                    { text: "Firewall do Azure", correct: false },
-                    { text: "Azure VPN Gateway", correct: true },
-                    { text: "ExpressRoute", correct: true },
-                    { text: "Azure Bastion", correct: false }
-                ],
-                explanation: "VPN Gateway e ExpressRoute conectam redes locais ao Azure."
-            },
-            {
-                id: 24,
-                question: "O que você pode usar para fornecer aos usuários Mac e Android acesso a um ambiente do Windows que executará aplicativos baseados no Windows?",
-                type: "single",
-                category: "Computação",
-                options: [
-                    { text: "Área de Trabalho Virtual do Azure", correct: true },
-                    { text: "Azure Virtual Machines", correct: false },
-                    { text: "Remote Desktop Services", correct: false },
-                    { text: "Azure App Service", correct: false }
-                ],
-                explanation: "Azure Virtual Desktop fornece acesso multiplataforma."
-            },
-            {
-                id: 25,
-                question: "Quais são dois serviços que permitem executar aplicativos em contêineres? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Computação",
-                options: [
-                    { text: "Instâncias de Contêiner do Azure", correct: true },
-                    { text: "AKS (Serviço de Kubernetes do Azure)", correct: true },
-                    { text: "Azure Virtual Machines", correct: false },
-                    { text: "Azure App Service", correct: false }
-                ],
-                explanation: "Ambos executam contêineres."
-            },
-            {
-                id: 26,
-                question: "Quais são os dois cenários de uso comuns para o Armazenamento de Blobs do Azure? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Armazenamento",
-                options: [
-                    { text: "servindo imagens ou documentos diretamente para um navegador", correct: true },
-                    { text: "armazenando dados para backup e restauração", correct: true },
-                    { text: "hospedando bancos de dados relacionais", correct: false },
-                    { text: "executando aplicativos web", correct: false }
-                ],
-                explanation: "Blobs são bons para arquivos estáticos e backups."
-            },
-            {
-                id: 27,
-                question: "Qual camada de serviço de Armazenamento de Blobs do Azure tem os maiores custos de armazenamento e os tempos de acesso mais rápidos para ler e gravar dados?",
-                type: "single",
-                category: "Armazenamento",
-                options: [
-                    { text: "Frequente (Hot)", correct: true },
-                    { text: "Esporádica (Cool)", correct: false },
-                    { text: "Arquivo (Archive)", correct: false },
-                    { text: "Premium", correct: false }
-                ],
-                explanation: "Camada Hot tem acesso mais rápido."
-            },
-            {
-                id: 28,
-                question: "Qual é a finalidade da defesa em profundidade?",
-                type: "single",
-                category: "Segurança",
-                options: [
-                    { text: "para usar várias camadas de proteção para impedir que as informações sejam acessadas por usuários não autorizados", correct: true },
-                    { text: "para garantir alta disponibilidade", correct: false },
-                    { text: "para reduzir custos de armazenamento", correct: false },
-                    { text: "para melhorar o desempenho da rede", correct: false }
-                ],
-                explanation: "Defesa em profundidade usa múltiplas camadas de segurança."
-            },
-            {
-                id: 29,
-                question: "A qual objeto ou nível uma função RBAC (controle de acesso baseado em função) do Azure é aplicada?",
-                type: "single",
-                category: "Segurança",
-                options: [
-                    { text: "escopo", correct: true },
-                    { text: "recurso", correct: false },
-                    { text: "assinatura", correct: false },
-                    { text: "grupo de gerenciamento", correct: false }
-                ],
-                explanation: "Funções RBAC são aplicadas a escopos."
-            },
-            {
-                id: 30,
-                question: "Qual recurso do Microsoft Entra você pode usar para configurar a autenticação de segurança que exige que os usuários usem seu celular para entrar?",
-                type: "single",
-                category: "Segurança",
-                options: [
-                    { text: "MFA (autenticação multifator)", correct: true },
-                    { text: "SSO (logon único)", correct: false },
-                    { text: "Acesso Condicional", correct: false },
-                    { text: "Identity Protection", correct: false }
-                ],
-                explanation: "MFA requer múltiplos fatores de autenticação."
-            },
-            {
-                id: 31,
-                question: "Quais são os dois serviços fornecidos pelo Microsoft Entra? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Segurança",
-                options: [
-                    { text: "autenticação", correct: true },
-                    { text: "SSO (logon único)", correct: true },
-                    { text: "firewall", correct: false },
-                    { text: "criptografia", correct: false }
-                ],
-                explanation: "Microsoft Entra fornece autenticação e SSO."
-            },
-            {
-                id: 32,
-                question: "Qual recurso do Microsoft Entra você pode usar para garantir que os usuários só possam acessar aplicativos do Microsoft Office 365 de aplicativos cliente aprovados?",
-                type: "single",
-                category: "Segurança",
-                options: [
-                    { text: "Acesso Condicional", correct: true },
-                    { text: "MFA (autenticação multifator)", correct: false },
-                    { text: "Identity Protection", correct: false },
-                    { text: "Privileged Identity Management", correct: false }
-                ],
-                explanation: "Acesso Condicional controla acesso baseado em condições."
-            },
-            {
-                id: 33,
-                question: "O que você pode usar para garantir que os usuários se autentiquem usando a MFA (autenticação multifator) ao tentarem entrar de um local específico?",
-                type: "single",
-                category: "Segurança",
-                options: [
-                    { text: "Acesso Condicional", correct: true },
-                    { text: "Identity Protection", correct: false },
-                    { text: "Privileged Identity Management", correct: false },
-                    { text: "Log Analytics", correct: false }
-                ],
-                explanation: "Acesso Condicional pode exigir MFA baseado em condições."
-            },
-            {
-                id: 34,
-                question: "Quais dois fatores afetam os custos do Azure? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Custos",
-                options: [
-                    { text: "seleção de zona de disponibilidade", correct: false },
-                    { text: "local do recurso", correct: true },
-                    { text: "uso de recursos", correct: true },
-                    { text: "cor do portal", correct: false }
-                ],
-                explanation: "Localização e uso afetam custos."
-            },
-            {
-                id: 35,
-                question: "Você precisa comparar os custos de execução de um aplicativo em um datacenter local com os custos de execução do aplicativo no Azure. O que você deve usar para ajudá-lo?",
-                type: "single",
-                category: "Custos",
-                options: [
-                    { text: "Calculadora de TCO (Custo Total de Propriedade)", correct: true },
-                    { text: "Azure Pricing Calculator", correct: false },
-                    { text: "Azure Cost Management", correct: false },
-                    { text: "Azure Advisor", correct: false }
-                ],
-                explanation: "Calculadora de TCO compara custos locais vs nuvem."
-            },
-            {
-                id: 36,
-                question: "Quais são dois cenários comuns para usar marcas de recurso? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Custos",
-                options: [
-                    { text: "associando custos com ambientes diferentes", correct: true },
-                    { text: "categorizando custos por departamento", correct: true },
-                    { text: "redimensionando máquinas virtuais", correct: false },
-                    { text: "provisionando recursos em regiões de menor custo", correct: false }
-                ],
-                explanation: "Marcas ajudam a categorizar custos."
-            },
-            {
-                id: 37,
-                question: "Quais são os dois recursos disponíveis usando o Gerenciamento de Custos do Azure + Cobrança? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Custos",
-                options: [
-                    { text: "Criar e gerenciar orçamentos.", correct: true },
-                    { text: "Gerar relatórios históricos e prever o uso futuro.", correct: true },
-                    { text: "Configurar autenticação multifator", correct: false },
-                    { text: "Implantar máquinas virtuais", correct: false }
-                ],
-                explanation: "Gerenciamento de Custos oferece orçamentos e relatórios."
-            },
-            {
-                id: 38,
-                question: "O que você pode usar para garantir que os recursos novos e existentes do Azure permaneçam em conformidade com os padrões corporativos?",
-                type: "single",
-                category: "Governança",
-                options: [
-                    { text: "Azure Policy", correct: true },
-                    { text: "Azure Blueprints", correct: false },
-                    { text: "Azure Resource Manager", correct: false },
-                    { text: "Azure Monitor", correct: false }
-                ],
-                explanation: "Azure Policy impõe conformidade."
-            },
-            {
-                id: 39,
-                question: "O que você pode aplicar a uma máquina virtual do Azure para garantir que os usuários não possam alterar ou excluir o recurso?",
-                type: "single",
-                category: "Governança",
-                options: [
-                    { text: "um bloqueio", correct: true },
-                    { text: "uma marca", correct: false },
-                    { text: "uma política", correct: false },
-                    { text: "uma identidade gerenciada", correct: false }
-                ],
-                explanation: "Bloqueios impedem alteração/exclusão."
-            },
-            {
-                id: 40,
-                question: "O que você pode usar para restringir a implantação de uma máquina virtual a um local específico?",
-                type: "single",
-                category: "Governança",
-                options: [
-                    { text: "Azure Policy", correct: true },
-                    { text: "Azure Resource Manager", correct: false },
-                    { text: "Azure Blueprints", correct: false },
-                    { text: "Azure Monitor", correct: false }
-                ],
-                explanation: "Azure Policy pode restringir regiões."
-            },
-            {
-                id: 41,
-                question: "O que você deve usar para acessar o Azure Cloud Shell?",
-                type: "single",
-                category: "Ferramentas",
-                options: [
-                    { text: "um navegador da Web", correct: true },
-                    { text: "PowerShell local", correct: false },
-                    { text: "Azure CLI local", correct: false },
-                    { text: "Visual Studio Code", correct: false }
-                ],
-                explanation: "Cloud Shell é acessado via navegador."
-            },
-            {
-                id: 42,
-                question: "Quais duas ferramentas você pode usar para criar uma nova máquina virtual do Azure a partir de um dispositivo móvel que executa o Android? Cada resposta correta apresenta uma solução completa.",
-                type: "multiple",
-                category: "Ferramentas",
-                options: [
-                    { text: "PowerShell no Azure Cloud Shell", correct: true },
-                    { text: "o portal do Azure", correct: true },
-                    { text: "Visual Studio", correct: false },
-                    { text: "Azure CLI local", correct: false }
-                ],
-                explanation: "Ambos funcionam em navegadores móveis."
-            },
-            {
-                id: 43,
-                question: "O que você pode usar para gerenciar servidores em plataformas de nuvem de terceiros e ambientes locais?",
-                type: "single",
-                category: "Ferramentas",
-                options: [
-                    { text: "Azure Arc", correct: true },
-                    { text: "Azure Policy", correct: false },
-                    { text: "Azure Monitor", correct: false },
-                    { text: "Azure Resource Manager", correct: false }
-                ],
-                explanation: "Azure Arc gerencia ambientes híbridos."
-            },
-            {
-                id: 44,
-                question: "Qual serviço do Azure avalia os recursos do Azure e faz recomendações para ajudar a melhorar a confiabilidade, a segurança, o desempenho e a redução de custos?",
-                type: "single",
-                category: "Monitoramento",
-                options: [
-                    { text: "Integridade do Serviço do Azure", correct: false },
-                    { text: "Assistente do Azure", correct: true },
-                    { text: "Azure Monitor", correct: false },
-                    { text: "Azure Policy", correct: false }
-                ],
-                explanation: "Azure Advisor faz recomendações."
-            },
-            {
-                id: 45,
-                question: "Você precisa examinar o relatório RCA (análise de causa raiz) para uma interrupção de serviço que ocorreu na semana passada. Onde você deve procurar o relatório?",
-                type: "single",
-                category: "Monitoramento",
-                options: [
-                    { text: "Integridade do Serviço do Azure", correct: true },
-                    { text: "Azure Monitor", correct: false },
-                    { text: "Azure Advisor", correct: false },
-                    { text: "Log Analytics", correct: false }
-                ],
-                explanation: "Service Health fornece RCAs de interrupções."
-            },
-            {
-                id: 46,
-                question: "Você precisa criar uma solução personalizada que use limites para disparar a funcionalidade de dimensionamento automático para escalar ou reduzir verticalmente um aplicativo para atender à demanda do usuário. O que você deve incluir na solução?",
-                type: "single",
-                category: "Monitoramento",
-                options: [
-                    { text: "Azure Monitor", correct: true },
-                    { text: "Azure Advisor", correct: false },
-                    { text: "Azure Policy", correct: false },
-                    { text: "Azure Service Health", correct: false }
-                ],
-                explanation: "Azure Monitor fornece métricas para autoscaling."
-            },
-            {
-                id: 47,
-                question: "O que você deve revisar e agir proativamente para evitar interrupções de serviço, como aposentadorias de serviços e alterações significativas?",
-                type: "single",
-                category: "Monitoramento",
-                options: [
-                    { text: "avisos de integridade", correct: true },
-                    { text: "problemas de serviço", correct: false },
-                    { text: "relatórios RCA", correct: false },
-                    { text: "logs de atividade", correct: false }
-                ],
-                explanation: "Avisos de integridade alertam sobre mudanças planejadas."
-            },
-            {
-                id: 48,
-                question: "O que você pode usar para detectar automaticamente anomalias de desempenho para aplicativos Web?",
-                type: "single",
-                category: "Monitoramento",
-                options: [
-                    { text: "Azure Application Insights", correct: true },
-                    { text: "Azure Monitor", correct: false },
-                    { text: "Azure Service Health", correct: false },
-                    { text: "Azure Advisor", correct: false }
-                ],
-                explanation: "Application Insights monitora apps web."
-            },
-            {
-                id: 49,
-                question: "O que você pode usar para receber uma notificação sobre uma interrupção em uma região específica do Azure?",
-                type: "single",
-                category: "Monitoramento",
-                options: [
-                    { text: "Integridade do Serviço do Azure", correct: true },
-                    { text: "Azure Monitor", correct: false },
-                    { text: "Azure Advisor", correct: false },
-                    { text: "Application Insights", correct: false }
-                ],
-                explanation: "Service Health notifica sobre interrupções."
-            },
-            {
-                id: 50,
-                question: "O que você pode usar para encontrar informações sobre a manutenção planejada para os serviços do Azure que são essenciais para sua organização?",
-                type: "single",
-                category: "Monitoramento",
-                options: [
-                    { text: "Assistente do Azure", correct: false },
-                    { text: "Integridade do Serviço do Azure", correct: true },
-                    { text: "Azure Monitor", correct: false },
-                    { text: "Application Insights", correct: false }
-                ],
-                explanation: "Service Health mostra manutenção planejada."
-            }
-        ];
-
-        // Estado do quiz
-        let currentQuestion = 0;
-        let userAnswers = Array(quizData.length).fill(null);
-        let score = 0;
-        let quizCompleted = false;
-        let incorrectQuestions = [];
-        
-        // Estado da revisão
-        let inReviewMode = false;
-        let currentReviewQuestion = 0;
-        let reviewAnswers = [];
-        let reviewScore = 0;
-        let reviewCompleted = false;
-
-        // Elementos DOM
-        const questionCounter = document.getElementById('question-counter');
-        const categoryElement = document.getElementById('category');
-        const questionTypeElement = document.getElementById('question-type');
-        const questionTextElement = document.getElementById('question-text');
-        const optionsContainer = document.getElementById('options-container');
-        const explanationContainer = document.getElementById('explanation-container');
-        const explanationText = document.getElementById('explanation-text');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const submitBtn = document.getElementById('submit-btn');
-        const restartBtn = document.getElementById('restart-btn');
-        const reviewBtn = document.getElementById('review-btn');
-        const restartBtn2 = document.getElementById('restart-btn-2');
-        const startReviewBtn = document.getElementById('start-review-btn');
-        const progressBar = document.getElementById('progress');
-        
-        // Resultados principais
-        const resultsContainer = document.getElementById('results-container');
-        const questionContainer = document.getElementById('question-container');
-        const scoreElement = document.getElementById('score');
-        const correctAnswersElement = document.getElementById('correct-answers');
-        const totalQuestionsElement = document.getElementById('total-questions');
-        const scoreTextElement = document.getElementById('score-text');
-        const correctCountElement = document.getElementById('correct-count');
-        const incorrectCountElement = document.getElementById('incorrect-count');
-        const percentageElement = document.getElementById('percentage');
-        const reviewSection = document.getElementById('review-section');
-        const wrongCountElement = document.getElementById('wrong-count');
-        const reviewMessage = document.getElementById('review-message');
-        
-        // Elementos da revisão
-        const reviewContainer = document.getElementById('review-container');
-        const reviewProgressBar = document.getElementById('review-progress');
-        const reviewQuestionCounter = document.getElementById('review-question-counter');
-        const reviewStats = document.getElementById('review-stats');
-        const reviewCategory = document.getElementById('review-category');
-        const reviewQuestionType = document.getElementById('review-question-type');
-        const reviewQuestionText = document.getElementById('review-question-text');
-        const reviewOptionsContainer = document.getElementById('review-options-container');
-        const reviewExplanationContainer = document.getElementById('review-explanation-container');
-        const reviewExplanationText = document.getElementById('review-explanation-text');
-        const reviewPrevBtn = document.getElementById('review-prev-btn');
-        const reviewNextBtn = document.getElementById('review-next-btn');
-        const submitReviewBtn = document.getElementById('submit-review-btn');
-        
-        // Resultados da revisão
-        const reviewResultsContainer = document.getElementById('review-results-container');
-        const reviewScoreElement = document.getElementById('review-score');
-        const reviewCorrectAnswersElement = document.getElementById('review-correct-answers');
-        const reviewTotalQuestionsElement = document.getElementById('review-total-questions');
-        const reviewScoreTextElement = document.getElementById('review-score-text');
-        const reviewCorrectCountElement = document.getElementById('review-correct-count');
-        const reviewIncorrectCountElement = document.getElementById('review-incorrect-count');
-        const reviewImprovementElement = document.getElementById('review-improvement');
-        const improvementTextElement = document.getElementById('improvement-text');
-        const backToMainResultsBtn = document.getElementById('back-to-main-results-btn');
-        const restartReviewBtn = document.getElementById('restart-review-btn');
-        const restartFullQuizBtn = document.getElementById('restart-full-quiz-btn');
-
-        // Inicializar quiz principal
-        function initQuiz() {
-            loadQuestion(currentQuestion);
-            updateProgress();
-            updateButtons();
-        }
-
-        // Carregar pergunta principal
-        function loadQuestion(questionIndex) {
-            const question = quizData[questionIndex];
-            
-            // Atualizar elementos de exibição
-            questionCounter.textContent = `Pergunta ${questionIndex + 1} de ${quizData.length}`;
-            categoryElement.textContent = question.category;
-            questionTypeElement.textContent = `Tipo: ${question.type === 'single' ? 'Escolha única' : 'Múltipla escolha'}`;
-            questionTextElement.textContent = question.question;
-            
-            // Limpar opções anteriores
-            optionsContainer.innerHTML = '';
-            
-            // Criar opções
-            question.options.forEach((option, index) => {
-                const optionElement = document.createElement('div');
-                optionElement.className = 'option';
-                
-                // Verificar se esta opção já foi selecionada anteriormente
-                const isSelected = userAnswers[questionIndex] && 
-                    (question.type === 'single' 
-                        ? userAnswers[questionIndex] === index 
-                        : userAnswers[questionIndex].includes(index));
-                
-                if (isSelected) {
-                    optionElement.classList.add('selected');
+        // Dados do checklist
+        const checklistData = {
+            categories: [
+                {
+                    id: 'carnes',
+                    title: '🥩 Carnes (Mensal)',
+                    collapsed: false,
+                    items: [
+                        { id: 'carne1', name: 'Peito de Frango', quantity: 2, unit: 'kg', price: 0, checked: false },
+                        { id: 'carne2', name: 'Coxa/Sobrecoxa de Frango', quantity: 1, unit: 'kg', price: 0, checked: false },
+                        { id: 'carne3', name: 'Carne para Cozinhar (músculo, acém)', quantity: 1.5, unit: 'kg', price: 0, checked: false },
+                        { id: 'carne4', name: 'Carne para Grelhar (patinho, fraldinha)', quantity: 1, unit: 'kg', price: 0, checked: false },
+                        { id: 'carne5', name: 'Carne Moída', quantity: 0.5, unit: 'kg', price: 0, checked: false },
+                        { id: 'carne6', name: 'Peixe (filé ou sardinha em lata)', quantity: 1, unit: 'kg ou 4 latas', price: 0, checked: false }
+                    ]
+                },
+                {
+                    id: 'sexta-basica',
+                    title: '🛒 Sexta Básica',
+                    collapsed: false,
+                    items: [
+                        { id: 'sb1', name: 'Arroz', quantity: 5, unit: 'kg', price: 0, checked: false },
+                        { id: 'sb2', name: 'Feijão', quantity: 2, unit: 'kg', price: 0, checked: false },
+                        { id: 'sb3', name: 'Macarrão', quantity: 1, unit: 'kg', price: 0, checked: false },
+                        { id: 'sb4', name: 'Farinha de Trigo', quantity: 1, unit: 'kg', price: 0, checked: false },
+                        { id: 'sb5', name: 'Açúcar', quantity: 1, unit: 'kg', price: 0, checked: false },
+                        { id: 'sb6', name: 'Óleo de Soja/Girassol', quantity: 1, unit: '900ml', price: 0, checked: false },
+                        { id: 'sb7', name: 'Café em Pó', quantity: 1, unit: '500g', price: 0, checked: false },
+                        { id: 'sb8', name: 'Molho de Tomate', quantity: 2, unit: 'latas', price: 0, checked: false },
+                        { id: 'sb9', name: 'Milho/Ervilha em Lata', quantity: 2, unit: 'latas', price: 0, checked: false }
+                    ]
+                },
+                {
+                    id: 'higiene',
+                    title: '🧴 Higiene Pessoal',
+                    collapsed: false,
+                    items: [
+                        { id: 'hig1', name: 'Sabonete', quantity: 5, unit: 'unidades', price: 0, checked: false },
+                        { id: 'hig2', name: 'Shampoo', quantity: 1, unit: 'frasco 350-500ml', price: 0, checked: false },
+                        { id: 'hig3', name: 'Condicionador', quantity: 1, unit: 'frasco', price: 0, checked: false },
+                        { id: 'hig4', name: 'Pasta de Dente', quantity: 2, unit: 'tubos', price: 0, checked: false },
+                        { id: 'hig5', name: 'Escova de Dentes', quantity: 1, unit: 'unidade', price: 0, checked: false },
+                        { id: 'hig6', name: 'Desodorante', quantity: 1, unit: 'unidade', price: 0, checked: false },
+                        { id: 'hig7', name: 'Papel Higiênico', quantity: 4, unit: 'rolos', price: 0, checked: false },
+                        { id: 'hig8', name: 'Lâminas de Barbear', quantity: 1, unit: 'pacote', price: 0, checked: false }
+                    ]
+                },
+                {
+                    id: 'limpeza',
+                    title: '🧽 Limpeza Doméstica',
+                    collapsed: false,
+                    items: [
+                        { id: 'limp1', name: 'Detergente Líquido (roupas)', quantity: 1, unit: 'frasco 1,5L ou 2kg', price: 0, checked: false },
+                        { id: 'limp2', name: 'Amaciante', quantity: 1, unit: 'frasco 1L', price: 0, checked: false },
+                        { id: 'limp3', name: 'Detergente (louça)', quantity: 1, unit: 'frasco 500ml', price: 0, checked: false },
+                        { id: 'limp4', name: 'Água Sanitária', quantity: 1, unit: '1-2L', price: 0, checked: false },
+                        { id: 'limp5', name: 'Desinfetante', quantity: 1, unit: '500ml', price: 0, checked: false },
+                        { id: 'limp6', name: 'Multiuso (limpa-vidros)', quantity: 1, unit: '500ml', price: 0, checked: false },
+                        { id: 'limp7', name: 'Sacos de Lixo', quantity: 2, unit: 'rolos', price: 0, checked: false },
+                        { id: 'limp8', name: 'Esponjas (aço e pia)', quantity: 1, unit: 'pacote', price: 0, checked: false }
+                    ]
+                },
+                {
+                    id: 'flv',
+                    title: '🥦 FLV (Frutas, Legumes, Verduras)',
+                    collapsed: false,
+                    items: [
+                        { id: 'flv1', name: 'Alho e Cebola', quantity: 1, unit: 'kg', price: 0, checked: false },
+                        { id: 'flv2', name: 'Tomate', quantity: 1.5, unit: 'kg', price: 0, checked: false },
+                        { id: 'flv3', name: 'Batata/Cenoura', quantity: 1.5, unit: 'kg', price: 0, checked: false },
+                        { id: 'flv4', name: 'Folhas (alface, rúcula)', quantity: 1, unit: 'por semana', price: 0, checked: false },
+                        { id: 'flv5', name: 'Frutas (banana, maçã, laranja)', quantity: 1, unit: 'variedade semanal', price: 0, checked: false },
+                        { id: 'flv6', name: 'Pimentão/Abobrinha', quantity: 1, unit: 'para refogar', price: 0, checked: false }
+                    ]
+                },
+                {
+                    id: 'laticinios',
+                    title: '🥛 Laticínios e Outros',
+                    collapsed: false,
+                    items: [
+                        { id: 'lat1', name: 'Leite UHT', quantity: 7, unit: 'caixas', price: 0, checked: false },
+                        { id: 'lat2', name: 'Ovos', quantity: 30, unit: 'unidades', price: 0, checked: false },
+                        { id: 'lat3', name: 'Queijo', quantity: 0.5, unit: 'kg', price: 0, checked: false },
+                        { id: 'lat4', name: 'Manteiga/Margarina', quantity: 0.25, unit: 'kg', price: 0, checked: false },
+                        { id: 'lat5', name: 'Pão (comprar semanal)', quantity: 1, unit: 'semanal', price: 0, checked: false },
+                        { id: 'lat6', name: 'Temperos (sal, pimenta, etc)', quantity: 1, unit: 'reposição', price: 0, checked: false }
+                    ]
                 }
-                
-                // Criar input baseado no tipo da pergunta
-                let inputElement;
-                if (question.type === 'single') {
-                    inputElement = document.createElement('input');
-                    inputElement.type = 'radio';
-                    inputElement.name = 'option';
-                    inputElement.value = index;
-                    inputElement.checked = isSelected;
-                } else {
-                    inputElement = document.createElement('input');
-                    inputElement.type = 'checkbox';
-                    inputElement.name = 'option';
-                    inputElement.value = index;
-                    inputElement.checked = isSelected;
-                }
-                
-                const labelElement = document.createElement('div');
-                labelElement.className = 'option-label';
-                labelElement.textContent = option.text;
-                
-                optionElement.appendChild(inputElement);
-                optionElement.appendChild(labelElement);
-                
-                // Adicionar evento de clique
-                optionElement.addEventListener('click', () => selectOption(optionElement, index, question.type));
-                
-                optionsContainer.appendChild(optionElement);
-            });
-            
-            // Mostrar/ocultar explicação baseado no estado do quiz
-            if (quizCompleted && userAnswers[questionIndex] !== null) {
-                showExplanation(questionIndex);
-            } else {
-                explanationContainer.style.display = 'none';
-            }
-        }
+            ]
+        };
 
-        // Carregar pergunta de revisão (interativa)
-        function loadReviewQuestion(questionIndex) {
-            if (incorrectQuestions.length === 0) return;
-            
-            const originalIndex = incorrectQuestions[questionIndex];
-            const question = quizData[originalIndex];
-            
-            // Atualizar elementos de exibição
-            reviewQuestionCounter.textContent = `Pergunta ${questionIndex + 1} de ${incorrectQuestions.length}`;
-            reviewCategory.textContent = question.category;
-            reviewQuestionType.textContent = `Tipo: ${question.type === 'single' ? 'Escolha única' : 'Múltipla escolha'}`;
-            reviewQuestionText.textContent = question.question;
-            
-            // Atualizar barra de progresso da revisão
-            const reviewProgressPercentage = ((questionIndex + 1) / incorrectQuestions.length) * 100;
-            reviewProgressBar.style.width = `${reviewProgressPercentage}%`;
-            
-            // Limpar opções anteriores
-            reviewOptionsContainer.innerHTML = '';
-            
-            // Criar opções (interativas para resposta)
-            question.options.forEach((option, index) => {
-                const optionElement = document.createElement('div');
-                optionElement.className = 'option';
-                
-                // Verificar se esta opção já foi selecionada na revisão
-                const isSelected = reviewAnswers[questionIndex] && 
-                    (question.type === 'single' 
-                        ? reviewAnswers[questionIndex] === index 
-                        : reviewAnswers[questionIndex].includes(index));
-                
-                if (isSelected) {
-                    optionElement.classList.add('selected');
-                }
-                
-                // Se a revisão já foi completada, mostrar se a resposta está correta
-                if (reviewCompleted) {
-                    if (option.correct) {
-                        optionElement.classList.add('correct');
-                    } else if (isSelected && !option.correct) {
-                        optionElement.classList.add('incorrect');
-                    }
-                }
-                
-                // Criar input baseado no tipo da pergunta
-                let inputElement;
-                if (question.type === 'single') {
-                    inputElement = document.createElement('input');
-                    inputElement.type = 'radio';
-                    inputElement.name = 'review-option';
-                    inputElement.value = index;
-                    inputElement.checked = isSelected;
-                    inputElement.disabled = reviewCompleted; // Desabilitar se revisão completada
-                } else {
-                    inputElement = document.createElement('input');
-                    inputElement.type = 'checkbox';
-                    inputElement.name = 'review-option';
-                    inputElement.value = index;
-                    inputElement.checked = isSelected;
-                    inputElement.disabled = reviewCompleted; // Desabilitar se revisão completada
-                }
-                
-                const labelElement = document.createElement('div');
-                labelElement.className = 'option-label';
-                labelElement.textContent = option.text;
-                
-                optionElement.appendChild(inputElement);
-                optionElement.appendChild(labelElement);
-                
-                // Adicionar evento de clique apenas se não estiver completado
-                if (!reviewCompleted) {
-                    optionElement.addEventListener('click', () => selectReviewOption(optionElement, index, question.type, questionIndex));
-                }
-                
-                reviewOptionsContainer.appendChild(optionElement);
-            });
-            
-            // Mostrar/ocultar explicação baseado no estado da revisão
-            if (reviewCompleted) {
-                reviewExplanationText.textContent = question.explanation;
-                reviewExplanationContainer.style.display = 'block';
-            } else {
-                reviewExplanationContainer.style.display = 'none';
-            }
-        }
-
-        // Selecionar opção no quiz principal
-        function selectOption(optionElement, optionIndex, questionType) {
-            const question = quizData[currentQuestion];
-            
-            // Se o quiz já foi completado, não permitir alterações
-            if (quizCompleted) return;
-            
-            // Para perguntas de escolha única
-            if (questionType === 'single') {
-                // Remover seleção anterior
-                document.querySelectorAll('.option').forEach(opt => {
-                    opt.classList.remove('selected');
-                    opt.querySelector('input').checked = false;
-                });
-                
-                // Marcar a opção selecionada
-                optionElement.classList.add('selected');
-                optionElement.querySelector('input').checked = true;
-                
-                // Salvar resposta
-                userAnswers[currentQuestion] = optionIndex;
-            } 
-            // Para perguntas de múltipla escolha
-            else {
-                // Alternar seleção
-                optionElement.classList.toggle('selected');
-                const input = optionElement.querySelector('input');
-                input.checked = !input.checked;
-                
-                // Obter todas as opções selecionadas
-                const selectedOptions = [];
-                document.querySelectorAll('.option').forEach((opt, idx) => {
-                    if (opt.querySelector('input').checked) {
-                        selectedOptions.push(idx);
+        // Carregar dados salvos do localStorage
+        function loadSavedData() {
+            const saved = localStorage.getItem('shoppingChecklist');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                parsed.categories.forEach((cat, catIndex) => {
+                    if (checklistData.categories[catIndex]) {
+                        checklistData.categories[catIndex].collapsed = cat.collapsed || false;
+                        cat.items.forEach((item, itemIndex) => {
+                            if (checklistData.categories[catIndex].items[itemIndex]) {
+                                checklistData.categories[catIndex].items[itemIndex].price = item.price;
+                                checklistData.categories[catIndex].items[itemIndex].checked = item.checked;
+                                checklistData.categories[catIndex].items[itemIndex].quantity = item.quantity || 1;
+                            }
+                        });
                     }
                 });
                 
-                // Salvar resposta
-                userAnswers[currentQuestion] = selectedOptions.length > 0 ? selectedOptions : null;
+                const savedNotes = localStorage.getItem('shoppingChecklistNotes');
+                if (savedNotes) {
+                    document.getElementById('notes').value = savedNotes;
+                }
             }
-            
-            updateButtons();
         }
 
-        // Selecionar opção na revisão
-        function selectReviewOption(optionElement, optionIndex, questionType, reviewQuestionIndex) {
-            const originalIndex = incorrectQuestions[reviewQuestionIndex];
-            const question = quizData[originalIndex];
+        // Salvar dados no localStorage
+        function saveChecklist() {
+            localStorage.setItem('shoppingChecklist', JSON.stringify(checklistData));
+            localStorage.setItem('shoppingChecklistNotes', document.getElementById('notes').value);
             
-            // Para perguntas de escolha única
-            if (questionType === 'single') {
-                // Remover seleção anterior
-                reviewOptionsContainer.querySelectorAll('.option').forEach(opt => {
-                    opt.classList.remove('selected');
-                    opt.querySelector('input').checked = false;
+            // Feedback visual
+            const btn = event.target.closest('.btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>✅</span> Checklist Salvo!';
+            btn.style.backgroundColor = '#27ae60';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.backgroundColor = '';
+            }, 2000);
+        }
+
+        // Alternar categoria (minimizar/expandir)
+        function toggleCategory(categoryId) {
+            const category = checklistData.categories.find(c => c.id === categoryId);
+            if (category) {
+                category.collapsed = !category.collapsed;
+                saveChecklist();
+                renderChecklist();
+            }
+        }
+
+        // Expandir todas as categorias
+        function expandAllCategories() {
+            checklistData.categories.forEach(category => {
+                category.collapsed = false;
+            });
+            saveChecklist();
+            renderChecklist();
+        }
+
+        // Minimizar todas as categorias
+        function collapseAllCategories() {
+            checklistData.categories.forEach(category => {
+                category.collapsed = true;
+            });
+            saveChecklist();
+            renderChecklist();
+        }
+
+        // Alternar todas as categorias
+        function toggleAllCategories() {
+            const allCollapsed = checklistData.categories.every(category => category.collapsed);
+            checklistData.categories.forEach(category => {
+                category.collapsed = !allCollapsed;
+            });
+            saveChecklist();
+            renderChecklist();
+        }
+
+        // Calcular subtotal do item
+        function calculateItemSubtotal(quantity, price) {
+            return (parseFloat(quantity) || 1) * (parseFloat(price) || 0);
+        }
+
+        // Renderizar o checklist
+        function renderChecklist() {
+            const container = document.getElementById('checklistContainer');
+            container.innerHTML = '';
+            
+            checklistData.categories.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = `category ${category.collapsed ? 'collapsed' : ''}`;
+                categoryElement.id = `category-${category.id}`;
+                
+                // Calcular total da categoria
+                let categoryTotal = 0;
+                category.items.forEach(item => {
+                    if (item.checked) {
+                        categoryTotal += calculateItemSubtotal(item.quantity, item.price);
+                    }
                 });
                 
-                // Marcar a opção selecionada
-                optionElement.classList.add('selected');
-                optionElement.querySelector('input').checked = true;
+                categoryElement.innerHTML = `
+                    <div class="category-header" onclick="toggleCategory('${category.id}')">
+                        <div class="category-title">
+                            <span class="toggle-icon">${category.collapsed ? '▶' : '▼'}</span>
+                            ${category.title}
+                        </div>
+                        <div class="category-total">R$ ${categoryTotal.toFixed(2)}</div>
+                    </div>
+                    <div class="category-content">
+                        <div class="items-list" id="items-${category.id}">
+                            ${category.items.map(item => {
+                                const subtotal = calculateItemSubtotal(item.quantity, item.price);
+                                return `
+                                <div class="item">
+                                    <div class="item-info">
+                                        <input type="checkbox" 
+                                               class="item-checkbox" 
+                                               id="check-${item.id}"
+                                               ${item.checked ? 'checked' : ''}
+                                               onchange="toggleItem('${category.id}', '${item.id}')">
+                                        <div class="item-controls">
+                                            <div class="item-name">${item.name}</div>
+                                            <div class="item-price-controls">
+                                                <input type="number" 
+                                                       class="quantity-input" 
+                                                       id="qty-${item.id}"
+                                                       value="${item.quantity || 1}"
+                                                       placeholder="1"
+                                                       step="0.1"
+                                                       min="0.1"
+                                                       onchange="updateQuantity('${category.id}', '${item.id}', this.value)">
+                                                <span class="unit-price-label">${item.unit}</span>
+                                                <input type="number" 
+                                                       class="price-input" 
+                                                       id="price-${item.id}"
+                                                       value="${item.price || ''}"
+                                                       placeholder="0,00"
+                                                       step="0.01"
+                                                       min="0"
+                                                       onchange="updatePrice('${category.id}', '${item.id}', this.value)">
+                                                <span class="unit-price-label">preço/un.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="item-value">R$ ${subtotal.toFixed(2)}</div>
+                                        ${item.price > 0 ? `<div class="item-subtotal">${item.quantity} ${item.unit} × R$ ${(parseFloat(item.price) || 0).toFixed(2)}</div>` : ''}
+                                    </div>
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
                 
-                // Salvar resposta
-                reviewAnswers[reviewQuestionIndex] = optionIndex;
-            } 
-            // Para perguntas de múltipla escolha
-            else {
-                // Alternar seleção
-                optionElement.classList.toggle('selected');
-                const input = optionElement.querySelector('input');
-                input.checked = !input.checked;
-                
-                // Obter todas as opções selecionadas
-                const selectedOptions = [];
-                reviewOptionsContainer.querySelectorAll('.option').forEach((opt, idx) => {
-                    if (opt.querySelector('input').checked) {
-                        selectedOptions.push(idx);
+                container.appendChild(categoryElement);
+            });
+            
+            calculateTotals();
+        }
+
+        // Alternar item (marcar/desmarcar)
+        function toggleItem(categoryId, itemId) {
+            const category = checklistData.categories.find(c => c.id === categoryId);
+            if (category) {
+                const item = category.items.find(i => i.id === itemId);
+                if (item) {
+                    item.checked = !item.checked;
+                    saveChecklist();
+                    renderChecklist();
+                }
+            }
+        }
+
+        // Atualizar quantidade do item
+        function updateQuantity(categoryId, itemId, value) {
+            const category = checklistData.categories.find(c => c.id === categoryId);
+            if (category) {
+                const item = category.items.find(i => i.id === itemId);
+                if (item) {
+                    item.quantity = parseFloat(value) || 1;
+                    saveChecklist();
+                    renderChecklist();
+                }
+            }
+        }
+
+        // Atualizar preço do item
+        function updatePrice(categoryId, itemId, value) {
+            const category = checklistData.categories.find(c => c.id === categoryId);
+            if (category) {
+                const item = category.items.find(i => i.id === itemId);
+                if (item) {
+                    item.price = parseFloat(value) || 0;
+                    saveChecklist();
+                    renderChecklist();
+                }
+            }
+        }
+
+        // Calcular totais
+        function calculateTotals() {
+            let grandTotal = 0;
+            
+            checklistData.categories.forEach(category => {
+                let categoryTotal = 0;
+                category.items.forEach(item => {
+                    if (item.checked) {
+                        categoryTotal += calculateItemSubtotal(item.quantity, item.price);
                     }
                 });
+                grandTotal += categoryTotal;
                 
-                // Salvar resposta
-                reviewAnswers[reviewQuestionIndex] = selectedOptions.length > 0 ? selectedOptions : null;
-            }
-            
-            updateReviewButtons();
-        }
-
-        // Mostrar explicação no quiz principal
-        function showExplanation(questionIndex) {
-            const question = quizData[questionIndex];
-            explanationText.textContent = question.explanation;
-            explanationContainer.style.display = 'block';
-            
-            // Destacar opções corretas e incorretas
-            const options = document.querySelectorAll('.option');
-            options.forEach((option, index) => {
-                const isCorrect = question.options[index].correct;
-                const wasSelected = userAnswers[questionIndex] && 
-                    (question.type === 'single' 
-                        ? userAnswers[questionIndex] === index 
-                        : userAnswers[questionIndex].includes(index));
-                
-                if (isCorrect) {
-                    option.classList.add('correct');
-                } else if (wasSelected && !isCorrect) {
-                    option.classList.add('incorrect');
-                }
-                
-                // Desabilitar interação
-                option.style.cursor = 'default';
-                option.querySelector('input').disabled = true;
-            });
-        }
-
-        // Atualizar barra de progresso principal
-        function updateProgress() {
-            const progressPercentage = ((currentQuestion + 1) / quizData.length) * 100;
-            progressBar.style.width = `${progressPercentage}%`;
-        }
-
-        // Atualizar botões principais
-        function updateButtons() {
-            // Botão Anterior
-            prevBtn.disabled = currentQuestion === 0;
-            
-            // Botão Próxima/Enviar
-            if (currentQuestion === quizData.length - 1) {
-                nextBtn.style.display = 'none';
-                submitBtn.style.display = 'inline-block';
-                submitBtn.disabled = userAnswers[currentQuestion] === null;
-            } else {
-                nextBtn.style.display = 'inline-block';
-                submitBtn.style.display = 'none';
-                nextBtn.disabled = userAnswers[currentQuestion] === null;
-            }
-            
-            // Botão Reiniciar e Revisar
-            restartBtn.style.display = quizCompleted ? 'inline-block' : 'none';
-            reviewBtn.style.display = quizCompleted && incorrectQuestions.length > 0 ? 'inline-block' : 'none';
-        }
-
-        // Atualizar botões da revisão
-        function updateReviewButtons() {
-            // Botão Anterior
-            reviewPrevBtn.disabled = currentReviewQuestion === 0;
-            
-            // Botão Próxima/Enviar
-            if (currentReviewQuestion === incorrectQuestions.length - 1) {
-                reviewNextBtn.style.display = 'none';
-                submitReviewBtn.style.display = 'inline-block';
-                submitReviewBtn.disabled = reviewAnswers[currentReviewQuestion] === null;
-            } else {
-                reviewNextBtn.style.display = 'inline-block';
-                submitReviewBtn.style.display = 'none';
-                reviewNextBtn.disabled = reviewAnswers[currentReviewQuestion] === null;
-            }
-        }
-
-        // Navegar para próxima pergunta principal
-        function nextQuestion() {
-            if (currentQuestion < quizData.length - 1) {
-                currentQuestion++;
-                loadQuestion(currentQuestion);
-                updateProgress();
-                updateButtons();
-            }
-        }
-
-        // Navegar para pergunta anterior principal
-        function prevQuestion() {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                loadQuestion(currentQuestion);
-                updateProgress();
-                updateButtons();
-            }
-        }
-
-        // Navegar para próxima pergunta de revisão
-        function nextReviewQuestion() {
-            if (currentReviewQuestion < incorrectQuestions.length - 1) {
-                currentReviewQuestion++;
-                loadReviewQuestion(currentReviewQuestion);
-                updateReviewButtons();
-            }
-        }
-
-        // Navegar para pergunta anterior de revisão
-        function prevReviewQuestion() {
-            if (currentReviewQuestion > 0) {
-                currentReviewQuestion--;
-                loadReviewQuestion(currentReviewQuestion);
-                updateReviewButtons();
-            }
-        }
-
-        // Calcular pontuação e identificar perguntas erradas
-        function calculateScoreAndIncorrect() {
-            let correctCount = 0;
-            incorrectQuestions = [];
-            
-            quizData.forEach((question, index) => {
-                const userAnswer = userAnswers[index];
-                
-                if (userAnswer !== null) {
-                    if (question.type === 'single') {
-                        // Para escolha única, verificar se a opção selecionada está correta
-                        if (question.options[userAnswer].correct) {
-                            correctCount++;
-                        } else {
-                            incorrectQuestions.push(index);
-                        }
-                    } else {
-                        // Para múltipla escolha, verificar se todas as corretas foram selecionadas
-                        // e nenhuma incorreta foi selecionada
-                        const correctOptions = question.options
-                            .map((opt, idx) => opt.correct ? idx : -1)
-                            .filter(idx => idx !== -1);
-                        
-                        const userSelected = userAnswer || [];
-                        
-                        // Verificar se o usuário selecionou exatamente as opções corretas
-                        const isCorrect = correctOptions.length === userSelected.length &&
-                            correctOptions.every(opt => userSelected.includes(opt));
-                        
-                        if (isCorrect) {
-                            correctCount++;
-                        } else {
-                            incorrectQuestions.push(index);
-                        }
-                    }
-                } else {
-                    // Se não respondeu, considera como erro
-                    incorrectQuestions.push(index);
+                // Atualizar total da categoria
+                const categoryElement = document.querySelector(`#category-${category.id} .category-total`);
+                if (categoryElement) {
+                    categoryElement.textContent = `R$ ${categoryTotal.toFixed(2)}`;
                 }
             });
             
-            return correctCount;
+            // Atualizar total geral
+            document.getElementById('totalValue').textContent = grandTotal.toFixed(2);
+            
+            // Feedback visual
+            const btn = event?.target?.closest('.btn');
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span>✅</span> Totais Calculados!';
+                btn.style.backgroundColor = '#27ae60';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.backgroundColor = '';
+                }, 1500);
+            }
         }
 
-        // Calcular pontuação da revisão
-        function calculateReviewScore() {
-            let correctCount = 0;
+        // Exportar para Excel
+        function exportToExcel() {
+            // Preparar dados para exportação
+            const exportData = [];
             
-            incorrectQuestions.forEach((originalIndex, reviewIndex) => {
-                const question = quizData[originalIndex];
-                const userAnswer = reviewAnswers[reviewIndex];
+            checklistData.categories.forEach(category => {
+                exportData.push([`Categoria: ${category.title}`]);
+                exportData.push(['Item', 'Quantidade', 'Unidade', 'Preço Unitário (R$)', 'Subtotal (R$)', 'Comprado?']);
                 
-                if (userAnswer !== null) {
-                    if (question.type === 'single') {
-                        // Para escolha única, verificar se a opção selecionada está correta
-                        if (question.options[userAnswer].correct) {
-                            correctCount++;
-                        }
-                    } else {
-                        // Para múltipla escolha, verificar se todas as corretas foram selecionadas
-                        const correctOptions = question.options
-                            .map((opt, idx) => opt.correct ? idx : -1)
-                            .filter(idx => idx !== -1);
-                        
-                        const userSelected = userAnswer || [];
-                        
-                        // Verificar se o usuário selecionou exatamente as opções corretas
-                        const isCorrect = correctOptions.length === userSelected.length &&
-                            correctOptions.every(opt => userSelected.includes(opt));
-                        
-                        if (isCorrect) {
-                            correctCount++;
-                        }
-                    }
-                }
+                category.items.forEach(item => {
+                    const subtotal = calculateItemSubtotal(item.quantity, item.price);
+                    exportData.push([
+                        item.name,
+                        item.quantity,
+                        item.unit,
+                        parseFloat(item.price) || 0,
+                        subtotal,
+                        item.checked ? 'Sim' : 'Não'
+                    ]);
+                });
+                
+                // Calcular total da categoria
+                const categoryTotal = category.items
+                    .filter(item => item.checked)
+                    .reduce((sum, item) => sum + calculateItemSubtotal(item.quantity, item.price), 0);
+                
+                exportData.push(['', '', '', '', 'Total:', `R$ ${categoryTotal.toFixed(2)}`]);
+                exportData.push([]); // Linha em branco
             });
             
-            return correctCount;
-        }
-
-        // Mostrar resultados principais
-        function showResults() {
-            score = calculateScoreAndIncorrect();
-            const percentage = Math.round((score / quizData.length) * 100);
-            const incorrectCount = quizData.length - score;
+            // Adicionar total geral
+            const grandTotal = checklistData.categories.reduce((total, category) => {
+                return total + category.items
+                    .filter(item => item.checked)
+                    .reduce((sum, item) => sum + calculateItemSubtotal(item.quantity, item.price), 0);
+            }, 0);
             
-            // Atualizar elementos de resultados
-            scoreElement.textContent = `${percentage}%`;
-            correctAnswersElement.textContent = score;
-            totalQuestionsElement.textContent = quizData.length;
-            correctCountElement.textContent = score;
-            incorrectCountElement.textContent = incorrectCount;
-            percentageElement.textContent = `${percentage}%`;
-            wrongCountElement.textContent = incorrectCount;
+            exportData.push(['TOTAL GERAL ESTIMADO:', '', '', '', '', `R$ ${grandTotal.toFixed(2)}`]);
             
-            // Texto baseado na pontuação
-            let scoreText = "";
-            if (percentage >= 90) {
-                scoreText = "Excelente! Você demonstrou um conhecimento excepcional!";
-            } else if (percentage >= 70) {
-                scoreText = "Bom trabalho! Você tem um bom entendimento dos conceitos.";
-            } else if (percentage >= 50) {
-                scoreText = "Razoável. Continue estudando para melhorar seu conhecimento.";
-            } else {
-                scoreText = "Recomenda-se revisar os conceitos fundamentais.";
+            // Adicionar observações
+            const notes = document.getElementById('notes').value;
+            if (notes) {
+                exportData.push([]);
+                exportData.push(['OBSERVAÇÕES:']);
+                exportData.push([notes]);
             }
             
-            scoreTextElement.textContent = scoreText;
+            // Adicionar data/hora
+            exportData.push([]);
+            exportData.push(['Exportado em:', new Date().toLocaleString('pt-BR')]);
             
-            // Mostrar/ocultar seção de revisão
-            if (incorrectCount > 0) {
-                reviewSection.style.display = 'block';
-                reviewMessage.textContent = `Você errou ${incorrectCount} pergunta(s).`;
-            } else {
-                reviewSection.style.display = 'none';
-            }
+            // Criar planilha
+            const ws = XLSX.utils.aoa_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Checklist Compras");
             
-            // Mostrar contêiner de resultados e ocultar perguntas
-            resultsContainer.style.display = 'block';
-            questionContainer.style.display = 'none';
-            document.querySelector('.progress-container').style.display = 'none';
-            document.querySelector('.buttons-container').style.display = 'none';
-            
-            // Marcar quiz como completado
-            quizCompleted = true;
-            
-            // Mostrar explicação para a última pergunta
-            loadQuestion(currentQuestion);
+            // Gerar nome do arquivo com data
+            const dateStr = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `checklist_compras_${dateStr}.xlsx`);
         }
 
-        // Iniciar modo de revisão
-        function startReviewMode() {
-            inReviewMode = true;
-            currentReviewQuestion = 0;
-            reviewAnswers = Array(incorrectQuestions.length).fill(null);
-            reviewCompleted = false;
+        // Exportar para PDF
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
             
-            // Atualizar estatísticas de revisão
-            reviewStats.textContent = `Respondendo ${incorrectQuestions.length} pergunta(s) que você errou.`;
+            // Usar uma fonte padrão que evite problemas de codificação
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
             
-            // Mostrar contêiner de revisão e ocultar resultados
-            reviewContainer.style.display = 'block';
-            resultsContainer.style.display = 'none';
+            let yPos = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            const margin = 20;
+            const contentWidth = pageWidth - (margin * 2);
             
-            // Carregar primeira pergunta de revisão
-            loadReviewQuestion(currentReviewQuestion);
+            // Título
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80);
+            doc.text("Checklist de Compras Mensais", pageWidth / 2, yPos, { align: "center" });
+            yPos += 8;
             
-            // Atualizar botões
-            updateReviewButtons();
-        }
-
-        // Mostrar resultados da revisão
-        function showReviewResults() {
-            reviewScore = calculateReviewScore();
-            const reviewPercentage = Math.round((reviewScore / incorrectQuestions.length) * 100);
-            const reviewIncorrectCount = incorrectQuestions.length - reviewScore;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            doc.setTextColor(100, 100, 100);
+            doc.text("Para homem de 32 anos - Exportado em " + new Date().toLocaleDateString('pt-BR'), pageWidth / 2, yPos, { align: "center" });
+            yPos += 15;
             
-            // Calcular melhoria (comparação com a primeira tentativa)
-            const originalScoreOnTheseQuestions = reviewScore; // Na primeira vez, todas estavam erradas
-            const improvement = reviewScore; // Quantas acertou agora que antes errou
-            
-            // Atualizar elementos de resultados da revisão
-            reviewScoreElement.textContent = `${reviewPercentage}%`;
-            reviewCorrectAnswersElement.textContent = reviewScore;
-            reviewTotalQuestionsElement.textContent = incorrectQuestions.length;
-            reviewScoreTextElement.textContent = `Na revisão, você acertou ${reviewScore} de ${incorrectQuestions.length} perguntas`;
-            reviewCorrectCountElement.textContent = reviewScore;
-            reviewIncorrectCountElement.textContent = reviewIncorrectCount;
-            reviewImprovementElement.textContent = `${improvement} perguntas`;
-            
-            // Texto sobre melhoria
-            let improvementText = "";
-            if (reviewPercentage >= 80) {
-                improvementText = "Ótima melhoria! Você aprendeu com seus erros anteriores.";
-            } else if (reviewPercentage >= 50) {
-                improvementText = "Boa melhoria! Continue estudando para fixar os conceitos.";
-            } else {
-                improvementText = "Recomenda-se estudar mais esses conceitos antes de tentar novamente.";
-            }
-            
-            improvementTextElement.textContent = improvementText;
-            
-            // Mostrar contêiner de resultados da revisão e ocultar revisão
-            reviewResultsContainer.style.display = 'block';
-            reviewContainer.style.display = 'none';
-            
-            // Marcar revisão como completada
-            reviewCompleted = true;
-            
-            // Recarregar a última pergunta para mostrar explicações
-            loadReviewQuestion(currentReviewQuestion);
-        }
-
-        // Voltar para resultados principais
-        function backToMainResults() {
-            reviewResultsContainer.style.display = 'none';
-            resultsContainer.style.display = 'block';
-        }
-
-        // Reiniciar revisão
-        function restartReview() {
-            inReviewMode = true;
-            currentReviewQuestion = 0;
-            reviewAnswers = Array(incorrectQuestions.length).fill(null);
-            reviewCompleted = false;
-            
-            // Mostrar contêiner de revisão e ocultar resultados da revisão
-            reviewContainer.style.display = 'block';
-            reviewResultsContainer.style.display = 'none';
-            
-            // Carregar primeira pergunta de revisão
-            loadReviewQuestion(currentReviewQuestion);
-            
-            // Atualizar botões
-            updateReviewButtons();
-        }
-
-        // Reiniciar quiz completo
-        function restartQuiz() {
-            currentQuestion = 0;
-            userAnswers = Array(quizData.length).fill(null);
-            score = 0;
-            quizCompleted = false;
-            incorrectQuestions = [];
-            inReviewMode = false;
-            currentReviewQuestion = 0;
-            reviewAnswers = [];
-            reviewScore = 0;
-            reviewCompleted = false;
-            
-            // Restaurar visibilidade dos elementos
-            resultsContainer.style.display = 'none';
-            reviewContainer.style.display = 'none';
-            reviewResultsContainer.style.display = 'none';
-            questionContainer.style.display = 'block';
-            document.getElementById('main-progress-container').style.display = 'flex';
-            document.getElementById('main-buttons-container').style.display = 'flex';
-            
-            // Reiniciar interface
-            initQuiz();
-        }
-
-        // Event listeners principais
-        prevBtn.addEventListener('click', prevQuestion);
-        nextBtn.addEventListener('click', nextQuestion);
-        submitBtn.addEventListener('click', showResults);
-        restartBtn.addEventListener('click', restartQuiz);
-        restartBtn2.addEventListener('click', restartQuiz);
-        startReviewBtn.addEventListener('click', startReviewMode);
-
-        // Event listeners da revisão
-        reviewPrevBtn.addEventListener('click', prevReviewQuestion);
-        reviewNextBtn.addEventListener('click', nextReviewQuestion);
-        submitReviewBtn.addEventListener('click', showReviewResults);
-
-        // Event listeners dos resultados da revisão
-        backToMainResultsBtn.addEventListener('click', backToMainResults);
-        restartReviewBtn.addEventListener('click', restartReview);
-        restartFullQuizBtn.addEventListener('click', restartQuiz);
-
-        // Navegação por teclado
-        document.addEventListener('keydown', function(e) {
-            if (inReviewMode && !reviewCompleted) {
-                if (e.key === 'ArrowRight' || e.key === ' ') {
-                    // Seta direita ou espaço para próxima pergunta
-                    if (currentReviewQuestion < incorrectQuestions.length - 1) {
-                        nextReviewQuestion();
-                    }
-                } else if (e.key === 'ArrowLeft') {
-                    // Seta esquerda para pergunta anterior
-                    if (currentReviewQuestion > 0) {
-                        prevReviewQuestion();
-                    }
+            // Dados das categorias
+            checklistData.categories.forEach((category, index) => {
+                // Verificar se precisa de nova página
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = 20;
                 }
+                
+                // Título da categoria (remover emojis para evitar problemas)
+                const cleanCategoryTitle = category.title.replace(/[^\w\s(),-]/g, '');
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(14);
+                doc.setTextColor(52, 152, 219);
+                doc.text(cleanCategoryTitle, margin, yPos);
+                yPos += 8;
+                
+                // Linha de cabeçalho da tabela
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(10);
+                doc.setTextColor(60, 60, 60);
+                
+                // Posições das colunas
+                const col1 = margin; // Item
+                const col2 = col1 + 70; // Qtd/Unit
+                const col3 = col2 + 30; // Preço Un.
+                const col4 = col3 + 25; // Subtotal
+                const col5 = col4 + 20; // Comprado
+                
+                doc.text("Item", col1, yPos);
+                doc.text("Qtd/Unit", col2, yPos);
+                doc.text("Preço Un.", col3, yPos);
+                doc.text("Subtotal", col4, yPos);
+                doc.text("✓", col5, yPos);
+                yPos += 4;
+                
+                // Linha divisória do cabeçalho
+                doc.setDrawColor(200, 200, 200);
+                doc.line(margin, yPos, pageWidth - margin, yPos);
+                yPos += 8;
+                
+                // Itens
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(10);
+                doc.setTextColor(50, 50, 50);
+                
+                let categoryTotal = 0;
+                
+                category.items.forEach(item => {
+                    // Verificar se precisa de nova página para o item
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                        // Recriar cabeçalho da categoria na nova página
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(14);
+                        doc.setTextColor(52, 152, 219);
+                        doc.text(cleanCategoryTitle + ' (continuação)', margin, yPos);
+                        yPos += 15;
+                        
+                        // Recriar cabeçalho da tabela
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(10);
+                        doc.setTextColor(60, 60, 60);
+                        doc.text("Item", col1, yPos);
+                        doc.text("Qtd/Unit", col2, yPos);
+                        doc.text("Preço Un.", col3, yPos);
+                        doc.text("Subtotal", col4, yPos);
+                        doc.text("✓", col5, yPos);
+                        yPos += 4;
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(margin, yPos, pageWidth - margin, yPos);
+                        yPos += 8;
+                        
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(10);
+                        doc.setTextColor(50, 50, 50);
+                    }
+                    
+                    const subtotal = calculateItemSubtotal(item.quantity, item.price);
+                    if (item.checked) categoryTotal += subtotal;
+                    
+                    // Nome do item (truncar se necessário)
+                    let itemName = item.name;
+                    if (itemName.length > 25) {
+                        itemName = itemName.substring(0, 25) + '...';
+                    }
+                    
+                    // Qtd/Unit
+                    const qtdUnit = `${item.quantity} ${item.unit}`;
+                    let qtdUnitText = qtdUnit;
+                    if (qtdUnit.length > 15) {
+                        qtdUnitText = qtdUnit.substring(0, 15) + '...';
+                    }
+                    
+                    doc.text(itemName, col1, yPos);
+                    doc.text(qtdUnitText, col2, yPos);
+                    doc.text(`R$ ${(parseFloat(item.price) || 0).toFixed(2)}`, col3, yPos);
+                    doc.text(`R$ ${subtotal.toFixed(2)}`, col4, yPos);
+                    doc.text(item.checked ? '✓' : '', col5, yPos);
+                    yPos += 6;
+                });
+                
+                // Total da categoria
+                yPos += 4;
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.setTextColor(39, 174, 96);
+                doc.text(`Total da categoria: R$ ${categoryTotal.toFixed(2)}`, margin, yPos);
+                yPos += 12;
+            });
+            
+            // Página de resumo
+            doc.addPage();
+            yPos = 20;
+            
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(44, 62, 80);
+            doc.text("Resumo Financeiro", pageWidth / 2, yPos, { align: "center" });
+            yPos += 20;
+            
+            // Calcular total geral
+            const grandTotal = checklistData.categories.reduce((total, category) => {
+                return total + category.items
+                    .filter(item => item.checked)
+                    .reduce((sum, item) => sum + calculateItemSubtotal(item.quantity, item.price), 0);
+            }, 0);
+            
+            doc.setFontSize(24);
+            doc.setTextColor(39, 174, 96);
+            doc.text(`TOTAL GERAL: R$ ${grandTotal.toFixed(2)}`, pageWidth / 2, yPos, { align: "center" });
+            yPos += 30;
+            
+            // Tabela de resumo por categoria
+            doc.setFontSize(12);
+            doc.setTextColor(60, 60, 60);
+            doc.text("Resumo por Categoria:", margin, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(10);
+            doc.setDrawColor(200, 200, 200);
+            
+            checklistData.categories.forEach(category => {
+                if (yPos > 270) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                const categoryTotal = category.items
+                    .filter(item => item.checked)
+                    .reduce((sum, item) => sum + calculateItemSubtotal(item.quantity, item.price), 0);
+                
+                const cleanCategoryTitle = category.title.replace(/[^\w\s(),-]/g, '');
+                const truncatedTitle = cleanCategoryTitle.length > 35 ? cleanCategoryTitle.substring(0, 35) + '...' : cleanCategoryTitle;
+                
+                doc.text(truncatedTitle, margin, yPos);
+                doc.text(`R$ ${categoryTotal.toFixed(2)}`, pageWidth - margin - 30, yPos, { align: "right" });
+                yPos += 6;
+                doc.line(margin, yPos, pageWidth - margin, yPos);
+                yPos += 8;
+            });
+            
+            // Observações
+            const notes = document.getElementById('notes').value;
+            if (notes.trim()) {
+                if (yPos > 220) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.setTextColor(60, 60, 60);
+                doc.text("Observações:", margin, yPos);
+                yPos += 8;
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(10);
+                doc.setTextColor(50, 50, 50);
+                
+                const splitNotes = doc.splitTextToSize(notes, contentWidth);
+                doc.text(splitNotes, margin, yPos);
             }
-        });
+            
+            // Rodapé com data
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Página ${i} de ${totalPages} - Gerado em ${new Date().toLocaleString('pt-BR')}`, pageWidth / 2, 287, { align: "center" });
+            }
+            
+            // Salvar PDF
+            doc.save(`checklist_compras_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        // Limpar tudo
+        function clearAll() {
+            document.getElementById('clearModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('clearModal').style.display = 'none';
+        }
+
+        function confirmClear() {
+            // Limpar dados
+            checklistData.categories.forEach(category => {
+                category.collapsed = false;
+                category.items.forEach(item => {
+                    item.price = 0;
+                    item.checked = false;
+                    // Restaurar quantidades padrão
+                    const originalData = {
+                        'carnes': {
+                            'carne1': 2, 'carne2': 1, 'carne3': 1.5, 'carne4': 1, 'carne5': 0.5, 'carne6': 1
+                        },
+                        'sexta-basica': {
+                            'sb1': 5, 'sb2': 2, 'sb3': 1, 'sb4': 1, 'sb5': 1, 'sb6': 1, 'sb7': 1, 'sb8': 2, 'sb9': 2
+                        },
+                        'higiene': {
+                            'hig1': 5, 'hig2': 1, 'hig3': 1, 'hig4': 2, 'hig5': 1, 'hig6': 1, 'hig7': 4, 'hig8': 1
+                        },
+                        'limpeza': {
+                            'limp1': 1, 'limp2': 1, 'limp3': 1, 'limp4': 1, 'limp5': 1, 'limp6': 1, 'limp7': 2, 'limp8': 1
+                        },
+                        'flv': {
+                            'flv1': 1, 'flv2': 1.5, 'flv3': 1.5, 'flv4': 1, 'flv5': 1, 'flv6': 1
+                        },
+                        'laticinios': {
+                            'lat1': 7, 'lat2': 30, 'lat3': 0.5, 'lat4': 0.25, 'lat5': 1, 'lat6': 1
+                        }
+                    };
+                    
+                    if (originalData[category.id] && originalData[category.id][item.id]) {
+                        item.quantity = originalData[category.id][item.id];
+                    }
+                });
+            });
+            
+            document.getElementById('notes').value = '';
+            
+            // Limpar localStorage
+            localStorage.removeItem('shoppingChecklist');
+            localStorage.removeItem('shoppingChecklistNotes');
+            
+            // Fechar modal e re-renderizar
+            closeModal();
+            renderChecklist();
+            
+            alert('Checklist limpo com sucesso!');
+        }
 
         // Inicializar
-        initQuiz();
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedData();
+            renderChecklist();
+            
+            // Adicionar evento de input para formatação automática de preços
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('price-input')) {
+                    // Formatar enquanto digita
+                    const value = e.target.value;
+                    if (value && !isNaN(value) && parseFloat(value) >= 0) {
+                        const formatted = parseFloat(value).toFixed(2);
+                        if (value !== formatted) {
+                            e.target.value = formatted;
+                        }
+                    }
+                }
+                
+                if (e.target.classList.contains('quantity-input')) {
+                    // Garantir que quantidade seja válida
+                    const value = e.target.value;
+                    if (value && (isNaN(value) || parseFloat(value) < 0.1)) {
+                        e.target.value = 1;
+                    }
+                }
+            });
+            
+            // Calcular totais automaticamente quando preços ou quantidades mudam
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('price-input') || 
+                    e.target.classList.contains('quantity-input') || 
+                    e.target.classList.contains('item-checkbox')) {
+                    setTimeout(calculateTotals, 100);
+                }
+            });
+            
+            // Salvar notas automaticamente
+            document.getElementById('notes').addEventListener('input', function() {
+                localStorage.setItem('shoppingChecklistNotes', this.value);
+            });
+        });
     </script>
 </body>
 </html>
